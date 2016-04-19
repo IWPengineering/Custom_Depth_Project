@@ -1,0 +1,31 @@
+Sensor Data Input Notes
+
+Near
+0	s
+192	s
+169	=
+247	>
+24	s
+0	s
+
+Medium
+0	s
+192	s
+169	=
+245	=
+24	s
+0	s
+
+Far
+0	s
+192	s
+185	<
+247	>
+24	s
+0	s
+
+
+Conclusion:
+This will not work directly with the Arduino, it will need a conversion chip such as MAX3323E.
+See for discussion: 	http://forum.arduino.cc/index.php?topic=42690.0
+See for example: 	https://www.arduino.cc/en/Tutorial/ArduinoSoftwareRS232
