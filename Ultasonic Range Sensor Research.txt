@@ -1,0 +1,10 @@
+Untrasonic Range Sensor
+
+http://www.maxbotix.com/Ultrasonic_Sensors/MB7383.htm
+Max Range: 10m
+Part#: MB7383
+
+
+Current: http://www.maxbotix.com/Ultrasonic_Sensors/MB7360.htm
+Max Range: 5m
+Part # MB7360
