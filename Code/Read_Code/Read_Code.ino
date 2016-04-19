@@ -16,14 +16,6 @@
  Not all pins on the Leonardo support change interrupts,
  so only the following can be used for RX:
  8, 9, 10, 11, 14 (MISO), 15 (SCK), 16 (MOSI).
-
- created back in the mists of time
- modified 25 May 2012
- by Tom Igoe
- based on Mikal Hart's example
-
- This example code is in the public domain.
-
  */
 #include <SoftwareSerial.h>
 
@@ -48,6 +40,7 @@ void loop() // run over and over
 {
   
   Serial.println("distance: " + getRange() + "mm");
+  delay(500);
 }
 
 /**
@@ -56,10 +49,12 @@ void loop() // run over and over
 * by David MacBride
 * 
 * Construncts and returns the distance from the Ultrasontic Range Sensor (mySerial) in the form of a String
-* Will return "FAIL" in the case of an error (this should be fixed in the near future)
+* Will return "FAIL" in the case of an error (this is rare, but should be fixed in the future)
 **/
 String getRange(){
   String distance = "";
+  while(mySerial.available()) 
+    mySerial.read();
   while(true){
     if (mySerial.available()){
       if (mySerial.read()== 'R'){
