@@ -6,12 +6,18 @@
 #include <Wire.h>
 
 SoftwareSerial sensorSerial(6, 7, true); // RX, TX
+File myFile;
+// change this to match your SD shield or module;
+//     Arduino Ethernet shield: pin 4
+//     Adafruit SD shields and modules: pin 10
+//     Sparkfun SD shield: pin 8
+const int chipSelect = 10;
+
 RTC_DS1307 RTC;
 DateTime now;
 
 const int rangeIn = 0;
-int lastRunMinute = 0;
-
+int lastSaveMinute = 0;
 
 
 void setup() {
@@ -22,6 +28,19 @@ void setup() {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
   sensorSerial.begin(9600);
+  
+  //initialize SD card
+  pinMode(SS, OUTPUT);
+  Serial.print("Initializing SD card...");
+  // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
+  // Note that even if it's not used as the CS pin, the hardware SS pin 
+  // (10 on most Arduino boards, 53 on the Mega) must be left as an output 
+  // or the SD library functions will not work.
+  if (!SD.begin(chipSelect)) {
+    Serial.println("initialization failed!");
+    return;
+  }
+  Serial.println("initialization done.");
   
   Wire.begin();
   RTC.begin();
@@ -53,12 +72,15 @@ void loop() {
 
   Serial.println(timeStamp());
   Serial.println("distance: " + getRange() + "mm");
+  writeToFile("test.txt", timeStamp() + " ");// + getRange() + "mm");
+  //NOTE: error adding getRange() to string (will not open file)
+  //Fix needed
   
   //int x=now.minute();
   if((now.minute()%2)==0){
-    if(lastRunMinute != now.minute()){
-      Serial.println("Running");
-      lastRunMinute = now.minute();
+    if(lastSaveMinute != now.minute()){
+      Serial.println("******Running Periodic Sequence******");
+      lastSaveMinute = now.minute();
     }
   }
   //x==now.minute()&&
@@ -130,4 +152,56 @@ String timeStamp(){
           + (String)now.hour() + ":" + (String)now.minute() + ":" + (String)now.second();
 }
 
+/**
+* writeToFile
+* modified 21 April 2016
+* by David MacBride
+*  
+* Saves a String to specified file
+* Will create a header on the first use of a file (needs to be modified)
+* 
+* Note:
+* * SD card attached to SPI bus as follows:
+* ** UNO:  MOSI - pin 11, MISO - pin 12, CLK - pin 13, CS - pin 4 (CS pin can be changed)
+*  and pin #10 (SS) must be an output
+* ** Mega:  MOSI - pin 51, MISO - pin 50, CLK - pin 52, CS - pin 4 (CS pin can be changed)
+*  and pin #52 (SS) must be an output
+* ** Leonardo: Connect to hardware SPI via the ICSP header
+**/
+void writeToFile(String fileNameString, String data){
+  char fileName[100]; // Or something long enough to hold the longest file name you will ever use.
+   fileNameString.toCharArray(fileName, sizeof(fileName));
+  boolean firstUse = false;
+   
+  //check file exsistance
+  if (SD.exists(fileName)) {
+    Serial.println(fileNameString + " exists.");
+  }
+  else {
+    Serial.println(fileNameString + " doesn't exist.");
+    firstUse = true;
+  }
+  
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  myFile = SD.open(fileName, FILE_WRITE);
+  
+  // if the file opened okay, write to it:
+  if (myFile) {
+    Serial.print("Writing to " + fileNameString + "...");
+    if(firstUse){//create information in this header
+      myFile.println("******************** LOG ********************");
+      myFile.print("This log was created ");
+      myFile.println(timeStamp());//TODO fix header error
+      myFile.println("Time Stamp            Level");
+    }
+    myFile.println(data);
+	// close the file:
+    myFile.close();
+    Serial.println("done.");
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening " + fileNameString);
+  }
+}
 
