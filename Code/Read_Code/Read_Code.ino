@@ -28,8 +28,6 @@ void setup()
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
-
-
   Serial.println("Coms Started");
 
   // set the data rate for the SoftwareSerial port
