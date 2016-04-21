@@ -1,11 +1,18 @@
 #include <SPI.h>
 #include <SD.h>
-
 #include <SoftwareSerial.h>
+#include <RTClib.h>
+// Date and time functions using a DS1307 RTC connected via I2C and Wire lib
+#include <Wire.h>
 
-SoftwareSerial sensorSerial(10, 11, true); // RX, TX
+SoftwareSerial sensorSerial(6, 7, true); // RX, TX
+RTC_DS1307 RTC;
+DateTime now;
 
 const int rangeIn = 0;
+int lastRunMinute = 0;
+
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -15,14 +22,47 @@ void setup() {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
   sensorSerial.begin(9600);
+  
+  Wire.begin();
+  RTC.begin();
+  
+if (! RTC.isrunning()) {
+  Serial.println("RTC is NOT running!");
+  // following line sets the RTC to the date & time this sketch was compiled
+  RTC.adjust(DateTime(__DATE__, __TIME__));
+  }
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  now = RTC.now();
   
-  
+  /*Serial.print(now.year(), DEC);
+  Serial.print('/');
+  Serial.print(now.month(), DEC);
+  Serial.print('/');
+  Serial.print(now.day(), DEC);
+  Serial.print(' ');
+  Serial.print(now.hour(), DEC);
+  Serial.print(':');
+  Serial.print(now.minute(), DEC);
+  Serial.print(':');
+  Serial.println(now.second(), DEC);
+  Serial.println("distance: " + getRange() + "mm");
+  Serial.println();*/
+
+  Serial.println(timeStamp());
   Serial.println("distance: " + getRange() + "mm");
   
+  //int x=now.minute();
+  if((now.minute()%2)==0){
+    if(lastRunMinute != now.minute()){
+      Serial.println("Running");
+      lastRunMinute = now.minute();
+    }
+  }
+  //x==now.minute()&&
+  delay(3000);
   
   /* Use for analog read pin of Ultrasonic Range Sensor
   double inch = analogRead(rangeIn) * 0.1981 - 1.9613;
@@ -71,3 +111,23 @@ String getRange(){
   }
   return distance;
 }
+
+String timeStamp(){
+  //Serial.print(now.year(), DEC);
+  //Serial.print('/');
+  //Serial.print(now.month(), DEC);
+  //Serial.print('/');
+  //Serial.print(now.day(), DEC);
+  //Serial.print(' ');
+  //Serial.print(now.hour(), DEC);
+  //Serial.print(':');
+  //Serial.print(now.minute(), DEC);
+  //Serial.print(':');
+  //Serial.println(now.second(), DEC);
+  //Serial.println("distance: " + getRange() + "mm");
+  //Serial.println();  
+  return (String)now.year() + "/" + (String)now.month() + "/" + (String)now.day() + " "
+          + (String)now.hour() + ":" + (String)now.minute() + ":" + (String)now.second();
+}
+
+
