@@ -11,6 +11,8 @@
 * Adafruit Data Logger Shield: MOSI - pin 11, MISO - pin 12, CLK - pin 13, CS - pin 4 (CS pin can be changed)
 *  and pin #10 (SS) must be an output
 */
+#define STORAGE_INTERVAL 5
+
 
 SoftwareSerial sensorSerial(6, 7, true); // RX, TX
 File myFile;
