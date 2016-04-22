@@ -86,7 +86,7 @@ void loop() {
 
 
 
-  if((now.minute()%5)==0){
+  if((now.minute() % STORAGE_INTERVAL) == 0){
     if(lastSaveMinute != now.minute()){
       Serial.println("******Running Periodic Sequence******");
       Serial.println(timeStamp());
