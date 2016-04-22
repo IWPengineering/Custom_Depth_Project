@@ -5,6 +5,13 @@
 // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 #include <Wire.h>
 
+/*
+* The Circuit:
+* Ultrasonic Range Sensor: Pin 5 - Arduino Pin 6
+* Adafruit Data Logger Shield: MOSI - pin 11, MISO - pin 12, CLK - pin 13, CS - pin 4 (CS pin can be changed)
+*  and pin #10 (SS) must be an output
+*/
+
 SoftwareSerial sensorSerial(6, 7, true); // RX, TX
 File myFile;
 // change this to match your SD shield or module;
@@ -52,11 +59,15 @@ if (! RTC.isrunning()) {
   }
 }
 
+
+
+
 void loop() {
   // put your main code here, to run repeatedly:
   now = RTC.now();
   
-  /*Serial.print(now.year(), DEC);
+  /*
+  Serial.print(now.year(), DEC);
   Serial.print('/');
   Serial.print(now.month(), DEC);
   Serial.print('/');
@@ -68,23 +79,22 @@ void loop() {
   Serial.print(':');
   Serial.println(now.second(), DEC);
   Serial.println("distance: " + getRange() + "mm");
-  Serial.println();*/
+  Serial.println();
+  */
 
-  Serial.println(timeStamp());
-  Serial.println("distance: " + getRange() + "mm");
-  writeToFile("test.txt", timeStamp() + " ");// + getRange() + "mm");
-  //NOTE: error adding getRange() to string (will not open file)
-  //Fix needed
-  
-  //int x=now.minute();
-  if((now.minute()%2)==0){
+
+
+  if((now.minute()%5)==0){
     if(lastSaveMinute != now.minute()){
       Serial.println("******Running Periodic Sequence******");
+      Serial.println(timeStamp());
+      Serial.println("distance: " + getRange() + "mm");
+      writeToFile("test.txt", timeStamp(), getRange());
+      
       lastSaveMinute = now.minute();
     }
   }
-  //x==now.minute()&&
-  delay(3000);
+  delay(1000);
   
   /* Use for analog read pin of Ultrasonic Range Sensor
   double inch = analogRead(rangeIn) * 0.1981 - 1.9613;
@@ -134,20 +144,16 @@ String getRange(){
   return distance;
 }
 
-String timeStamp(){
-  //Serial.print(now.year(), DEC);
-  //Serial.print('/');
-  //Serial.print(now.month(), DEC);
-  //Serial.print('/');
-  //Serial.print(now.day(), DEC);
-  //Serial.print(' ');
-  //Serial.print(now.hour(), DEC);
-  //Serial.print(':');
-  //Serial.print(now.minute(), DEC);
-  //Serial.print(':');
-  //Serial.println(now.second(), DEC);
-  //Serial.println("distance: " + getRange() + "mm");
-  //Serial.println();  
+/**
+* timeStamp
+* 
+* Returns the time and date in the form of a String
+* 
+* modified 21 April 2016
+* by Paul Zwart
+*/
+
+String timeStamp(){ 
   return (String)now.year() + "/" + (String)now.month() + "/" + (String)now.day() + " "
           + (String)now.hour() + ":" + (String)now.minute() + ":" + (String)now.second();
 }
@@ -168,7 +174,7 @@ String timeStamp(){
 *  and pin #52 (SS) must be an output
 * ** Leonardo: Connect to hardware SPI via the ICSP header
 **/
-void writeToFile(String fileNameString, String data){
+void writeToFile(String fileNameString, String time, String range){
   char fileName[100]; // Or something long enough to hold the longest file name you will ever use.
    fileNameString.toCharArray(fileName, sizeof(fileName));
   boolean firstUse = false;
@@ -192,10 +198,24 @@ void writeToFile(String fileNameString, String data){
     if(firstUse){//create information in this header
       myFile.println("******************** LOG ********************");
       myFile.print("This log was created ");
-      myFile.println(timeStamp());//TODO fix header error
+      myFile.print(now.year(), DEC);
+      myFile.print('/');
+      myFile.print(now.month(), DEC);
+      myFile.print('/');
+      myFile.print(now.day(), DEC);
+      myFile.print(' ');
+      myFile.print(now.hour(), DEC);
+      myFile.print(':');
+      myFile.print(now.minute(), DEC);
+      myFile.print(':');
+      myFile.println(now.second(), DEC);
       myFile.println("Time Stamp            Level");
     }
-    myFile.println(data);
+    myFile.print(time);
+    myFile.print("     ");
+    myFile.print(range);
+    myFile.println("mm");
+    
 	// close the file:
     myFile.close();
     Serial.println("done.");
