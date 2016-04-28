@@ -2,6 +2,8 @@
 #include <SD.h>
 #include <SoftwareSerial.h>
 #include <RTClib.h>
+//#include <DateTimeStrings.h>
+//#include <DateTime.h>
 // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 #include <Wire.h>
 
@@ -11,17 +13,18 @@
 * Adafruit Data Logger Shield: MOSI - pin 11, MISO - pin 12, CLK - pin 13, CS - pin 4 (CS pin can be changed)
 *  and pin #10 (SS) must be an output
 */
-#define STORAGE_INTERVAL 5
+#define STORAGE_INTERVAL 1
 
 
 SoftwareSerial sensorSerial(6, 7, true); // RX, TX
-File myFile;
+//File myFile;
 // change this to match your SD shield or module;
 //     Arduino Ethernet shield: pin 4
 //     Adafruit SD shields and modules: pin 10
 //     Sparkfun SD shield: pin 8
 const int chipSelect = 10;
 
+File myFile;
 RTC_DS1307 RTC;
 DateTime now;
 
@@ -29,13 +32,15 @@ const int rangeIn = 0;
 int lastSaveMinute = 0;
 
 
+
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   
-  while (!Serial) {
+  /*while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
-  }
+  }*/
   sensorSerial.begin(9600);
   
   //initialize SD card
@@ -69,29 +74,25 @@ void loop() {
   now = RTC.now();
   
   /*
-  Serial.print(now.year(), DEC);
-  Serial.print('/');
-  Serial.print(now.month(), DEC);
-  Serial.print('/');
-  Serial.print(now.day(), DEC);
-  Serial.print(' ');
-  Serial.print(now.hour(), DEC);
-  Serial.print(':');
-  Serial.print(now.minute(), DEC);
-  Serial.print(':');
-  Serial.println(now.second(), DEC);
-  Serial.println("distance: " + getRange() + "mm");
-  Serial.println();
+   * date functions
+   * now.year()
+   * now.month()
+   * now.day()
+   * now.hour()
+   * now.minute()
+   * now.second()
+   * 
+   * Serial.println("distance: " + getRange() + "mm");
   */
 
 
 
-  if((now.minute() % STORAGE_INTERVAL) == 0){
+  if((now.minute() % STORAGE_INTERVAL) == 0){//
     if(lastSaveMinute != now.minute()){
       Serial.println("******Running Periodic Sequence******");
       Serial.println(timeStamp());
       Serial.println("distance: " + getRange() + "mm");
-      writeToFile("test.txt", timeStamp(), getRange());
+      writeToFile((String)now.year() + "-" + (String)now.month() + ".txt", timeStamp(), getRange());// + (String)now.year() + "-" + (String)now.month() + "-" + (String)now.day()
       
       lastSaveMinute = now.minute();
     }
@@ -169,6 +170,10 @@ String timeStamp(){
 * Will create a header on the first use of a file (needs to be modified)
 * 
 * Note:
+* Name must be shorter than 9 bytes with a a 3 byte extention. Anything
+* too large will fail to create or open the file
+* 
+* Circuit info:
 * * SD card attached to SPI bus as follows:
 * ** UNO:  MOSI - pin 11, MISO - pin 12, CLK - pin 13, CS - pin 4 (CS pin can be changed)
 *  and pin #10 (SS) must be an output
@@ -176,9 +181,10 @@ String timeStamp(){
 *  and pin #52 (SS) must be an output
 * ** Leonardo: Connect to hardware SPI via the ICSP header
 **/
-void writeToFile(String fileNameString, String time, String range){
-  char fileName[100]; // Or something long enough to hold the longest file name you will ever use.
-   fileNameString.toCharArray(fileName, sizeof(fileName));
+void writeToFile(String fileNameString, String timeText, String range){
+  char fileName[11]; // The max file name length alowed by Arduino.
+  fileNameString.toCharArray(fileName, sizeof(fileName));
+  //Serial.println(fileName);
   boolean firstUse = false;
    
   //check file exsistance
@@ -211,10 +217,10 @@ void writeToFile(String fileNameString, String time, String range){
       myFile.print(now.minute(), DEC);
       myFile.print(':');
       myFile.println(now.second(), DEC);
-      myFile.println("Time Stamp            Level");
+      myFile.println("Time Stamp,\t\tLevel");
     }
-    myFile.print(time);
-    myFile.print("     ");
+    myFile.print(timeText);
+    myFile.print(",\t");
     myFile.print(range);
     myFile.println("mm");
     
@@ -226,4 +232,5 @@ void writeToFile(String fileNameString, String time, String range){
     Serial.println("error opening " + fileNameString);
   }
 }
+
 
