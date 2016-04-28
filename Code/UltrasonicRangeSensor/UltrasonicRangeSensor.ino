@@ -2,9 +2,7 @@
 #include <SD.h>
 #include <SoftwareSerial.h>
 #include <RTClib.h>
-
-// Date and time functions using a DS1307 RTC connected via I2C and Wire lib
-#include <Wire.h>
+#include <Wire.h> // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 
 #define STORAGE_INTERVAL 5 //time in minutes
 #define SENSOR_SERIAL_RX 6 //pin for sensor
@@ -18,25 +16,20 @@
 #define SD_CHIP_SELECT 10
 
 /*
-* The Circuit:
-* Ultrasonic Range Sensor: Pin 5 - Arduino Pin 6 (SoftSerial also requires a TX pin, we are using 7)
-* Adafruit Data Logger Shield: MOSI - pin 11, MISO - pin 12, CLK - pin 13, CS - pin 4 (CS pin can be changed)
-*  and pin #10 (SS) must be an output
-*/
+ * Note:
+ * See line 68 for instructions on manually reseting the time and date on the dataloging shield.
+ * 
+ * The Circuit:
+ * Ultrasonic Range Sensor: Pin 5 - Arduino Pin 6 (SoftSerial also requires a TX pin, we are using 7)
+ * Adafruit Data Logger Shield: MOSI - pin 11, MISO - pin 12, CLK - pin 13, CS - pin 4 (CS pin can be changed)
+ *  and pin #10 (SS) must be an output
+ */
 
 
 SoftwareSerial sensorSerial(SENSOR_SERIAL_RX, SENSOR_SERIAL_TX, true); // RX, TX
-//File dataFile;
-// change this to match your SD shield or module;
-//     Arduino Ethernet shield: pin 4
-//     Adafruit SD shields and modules: pin 10
-//     Sparkfun SD shield: pin 8
-//const int chipSelect = 10;
-
 File dataFile;
 RTC_DS1307 RTC;
 DateTime now;
-
 const int rangeIn = 0;
 int lastSaveMinute = 0;
 
@@ -67,7 +60,11 @@ void setup() {
   
   Wire.begin();
   RTC.begin();
-  
+
+  /* To set the time on the data logging sheild to the time on your computer,
+   * comment out the if and upload, than uncoment it and upload again. It should 
+   * automatically set the time for the first use
+  */
   if (! RTC.isrunning()) {
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
