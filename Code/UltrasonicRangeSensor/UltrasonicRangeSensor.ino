@@ -2,29 +2,38 @@
 #include <SD.h>
 #include <SoftwareSerial.h>
 #include <RTClib.h>
-//#include <DateTimeStrings.h>
-//#include <DateTime.h>
+
 // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 #include <Wire.h>
 
-/*
-* The Circuit:
-* Ultrasonic Range Sensor: Pin 5 - Arduino Pin 6
-* Adafruit Data Logger Shield: MOSI - pin 11, MISO - pin 12, CLK - pin 13, CS - pin 4 (CS pin can be changed)
-*  and pin #10 (SS) must be an output
-*/
-#define STORAGE_INTERVAL 1
+#define STORAGE_INTERVAL 5 //time in minutes
+#define SENSOR_SERIAL_RX 6 //pin for sensor
+#define SENSOR_SERIAL_TX 7 //pin (unused)
+#define MAX_FILE_NAME_LENGTH 11 //max length of total file name that Arduino allowes (format 8.3)
 
-
-SoftwareSerial sensorSerial(6, 7, true); // RX, TX
-//File myFile;
 // change this to match your SD shield or module;
 //     Arduino Ethernet shield: pin 4
 //     Adafruit SD shields and modules: pin 10
 //     Sparkfun SD shield: pin 8
-const int chipSelect = 10;
+#define SD_CHIP_SELECT 10
 
-File myFile;
+/*
+* The Circuit:
+* Ultrasonic Range Sensor: Pin 5 - Arduino Pin 6 (SoftSerial also requires a TX pin, we are using 7)
+* Adafruit Data Logger Shield: MOSI - pin 11, MISO - pin 12, CLK - pin 13, CS - pin 4 (CS pin can be changed)
+*  and pin #10 (SS) must be an output
+*/
+
+
+SoftwareSerial sensorSerial(SENSOR_SERIAL_RX, SENSOR_SERIAL_TX, true); // RX, TX
+//File dataFile;
+// change this to match your SD shield or module;
+//     Arduino Ethernet shield: pin 4
+//     Adafruit SD shields and modules: pin 10
+//     Sparkfun SD shield: pin 8
+//const int chipSelect = 10;
+
+File dataFile;
 RTC_DS1307 RTC;
 DateTime now;
 
@@ -50,7 +59,7 @@ void setup() {
   // Note that even if it's not used as the CS pin, the hardware SS pin 
   // (10 on most Arduino boards, 53 on the Mega) must be left as an output 
   // or the SD library functions will not work.
-  if (!SD.begin(chipSelect)) {
+  if (!SD.begin(SD_CHIP_SELECT)) {
     Serial.println("initialization failed!");
     return;
   }
@@ -59,10 +68,10 @@ void setup() {
   Wire.begin();
   RTC.begin();
   
-if (! RTC.isrunning()) {
-  Serial.println("RTC is NOT running!");
-  // following line sets the RTC to the date & time this sketch was compiled
-  RTC.adjust(DateTime(__DATE__, __TIME__));
+  if (! RTC.isrunning()) {
+    Serial.println("RTC is NOT running!");
+    // following line sets the RTC to the date & time this sketch was compiled
+    RTC.adjust(DateTime(__DATE__, __TIME__));
   }
 }
 
@@ -92,7 +101,8 @@ void loop() {
       Serial.println("******Running Periodic Sequence******");
       Serial.println(timeStamp());
       Serial.println("distance: " + getRange() + "mm");
-      writeToFile((String)now.year() + "-" + (String)now.month() + ".txt", timeStamp(), getRange());// + (String)now.year() + "-" + (String)now.month() + "-" + (String)now.day()
+      writeToFile((String)now.year() + "-" + (String)now.month() + ".txt", timeStamp(), getRange());
+      // + (String)now.year() + "-" + (String)now.month() + "-" + (String)now.day()
       
       lastSaveMinute = now.minute();
     }
@@ -182,7 +192,7 @@ String timeStamp(){
 * ** Leonardo: Connect to hardware SPI via the ICSP header
 **/
 void writeToFile(String fileNameString, String timeText, String range){
-  char fileName[11]; // The max file name length alowed by Arduino.
+  char fileName[MAX_FILE_NAME_LENGTH]; // The max file name length alowed by Arduino.
   fileNameString.toCharArray(fileName, sizeof(fileName));
   //Serial.println(fileName);
   boolean firstUse = false;
@@ -198,34 +208,24 @@ void writeToFile(String fileNameString, String timeText, String range){
   
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
-  myFile = SD.open(fileName, FILE_WRITE);
+  dataFile = SD.open(fileName, FILE_WRITE);
   
   // if the file opened okay, write to it:
-  if (myFile) {
+  if (dataFile) {
     Serial.print("Writing to " + fileNameString + "...");
     if(firstUse){//create information in this header
-      myFile.println("******************** LOG ********************");
-      myFile.print("This log was created ");
-      myFile.print(now.year(), DEC);
-      myFile.print('/');
-      myFile.print(now.month(), DEC);
-      myFile.print('/');
-      myFile.print(now.day(), DEC);
-      myFile.print(' ');
-      myFile.print(now.hour(), DEC);
-      myFile.print(':');
-      myFile.print(now.minute(), DEC);
-      myFile.print(':');
-      myFile.println(now.second(), DEC);
-      myFile.println("Time Stamp,\t\tLevel");
+      dataFile.println("******************** LOG ********************");
+      dataFile.print("This log was created ");
+      dataFile.println(timeText);
+      dataFile.println("Time Stamp,\t\tLevel");
     }
-    myFile.print(timeText);
-    myFile.print(",\t");
-    myFile.print(range);
-    myFile.println("mm");
+    dataFile.print(timeText);
+    dataFile.print(",\t");
+    dataFile.print(range);
+    dataFile.println("mm");
     
 	// close the file:
-    myFile.close();
+    dataFile.close();
     Serial.println("done.");
   } else {
     // if the file didn't open, print an error:
