@@ -1,13 +1,30 @@
-#include <SPI.h>
-#include <SD.h>
-#include <SoftwareSerial.h>
-#include <RTClib.h>
-#include <Wire.h> // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
+//#include <SPI.h>             // SPI library **may need to be included**
+#include <SD.h>              // SD read and write library
+#include <SoftwareSerial.h>  // TX and RX simulation library
+#include <RTClib.h>          // Real Time Clock library
+#include <Wire.h>            // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
+#include <Adafruit_GFX.h>    // Core graphics library
+#include <Adafruit_TFTLCD.h> // Hardware-specific library
 
-#define STORAGE_INTERVAL 5 //time in minutes
-#define SENSOR_SERIAL_RX 6 //pin for sensor
-#define SENSOR_SERIAL_TX 7 //pin (unused)
+#define STORAGE_INTERVAL 1 //time in minutes
+#define SENSOR_SERIAL_RX 5 //pin for sensor
+#define SENSOR_SERIAL_TX 4 //pin (unused)
 #define MAX_FILE_NAME_LENGTH 13 //max length of total file name that Arduino allowes (format 8.3)
+
+#define LCD_CS A3 // Chip Select goes to Analog 3
+#define LCD_CD A2 // Command/Data goes to Analog 2
+#define LCD_WR A1 // LCD Write goes to Analog 1
+#define LCD_RD A0 // LCD Read goes to Analog 0
+#define LCD_RESET A4 // Can alternately just connect to Arduino's reset pin
+
+#define BLACK   0x0000
+#define BLUE    0x001F
+#define RED     0xF800
+#define GREEN   0x07E0
+#define CYAN    0x07FF
+#define MAGENTA 0xF81F
+#define YELLOW  0xFFE0
+#define WHITE   0xFFFF
 
 // change this to match your SD shield or module;
 //     Arduino Ethernet shield: pin 4
@@ -15,16 +32,36 @@
 //     Sparkfun SD shield: pin 8
 #define SD_CHIP_SELECT 10
 
+Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
+// If using the shield, all control and data lines are fixed, and
+// a simpler declaration can optionally be used:
+//Adafruit_TFTLCD tft;
+
+#define tftwidth 320
+#define tftheight 480
 /*
  * Note:
  * See line 68 for instructions on manually reseting the time and date on the dataloging shield.
  * 
  * The Circuit:
  * Ultrasonic Range Sensor: Pin 5 - Arduino Pin 6 (SoftSerial also requires a TX pin, we are using 7)
+ * 
  * Adafruit Data Logger Shield: MOSI - pin 11, MISO - pin 12, CLK - pin 13, CS - pin 4 (CS pin can be changed)
- *  and pin #10 (SS) must be an output
+ * and pin #10 (SS) must be an output
+ * 
+ * When using the BREAKOUT BOARD only, use these 8 data lines to the LCD:
+ * For the Arduino Uno, Duemilanove, Diecimila, etc.:  
+ * D0 connects to digital pin 8  (Notice these are  
+ * D1 connects to digital pin 9   NOT in order!)  
+ * D2 connects to digital pin 2  
+ * D3 connects to digital pin 3  
+ * D4 connects to digital pin 4  
+ * D5 connects to digital pin 5  
+ * D6 connects to digital pin 6  
+ * D7 connects to digital pin 7
+ * For the Arduino Mega, use digital pins 22 through 29
+ * (on the 2-row header at the end of the board).
  */
-
 
 SoftwareSerial sensorSerial(A5,A4,true);//SENSOR_SERIAL_RX, SENSOR_SERIAL_TX, true); // RX, TX
 File dataFile;
@@ -65,17 +102,49 @@ void setup() {
    * comment out the if and upload, than uncoment it and upload again. It should 
    * automatically set the time for the first use
   */
-  if (! RTC.isrunning()) {
+  /*if (! RTC.isrunning()) {
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
     RTC.adjust(DateTime(__DATE__, __TIME__));
-  }
+  }*/
+
+  #ifdef USE_ADAFRUIT_SHIELD_PINOUT
+  Serial.println(F("Using Adafruit 2.8\" TFT Arduino Shield Pinout"));
+#else
+  Serial.println(F("Using Adafruit 2.8\" TFT Breakout Board Pinout"));
+#endif
+  Serial.print("TFT size is "); Serial.print(tft.width()); Serial.print("x"); Serial.println(tft.height());
+
+  tft.reset();
+
+  uint16_t identifier = tft.readID();
+
+    if(identifier == 0x8357) {
+    Serial.println(F("Found HX8357D LCD driver"));
+  } else {
+    Serial.print(F("Unknown LCD driver chip: "));
+    Serial.println(identifier, HEX);
+    /*Serial.println(F("If using the Adafruit 2.8\" TFT Arduino shield, the line:"));
+    Serial.println(F("  #define USE_ADAFRUIT_SHIELD_PINOUT"));
+    Serial.println(F("should appear in the library header (Adafruit_TFT.h)."));
+    Serial.println(F("If using the breakout board, it should NOT be #defined!"));
+    Serial.println(F("Also if using the breakout, double-check that all wiring"));*/
+    return;
+}
+
+tft.begin(identifier);
+tft.fillScreen(BLACK);
+tft.setTextColor(WHITE);
+tft.setTextSize(4);
+tft.println("Starting Up");
+  
 }
 
 
 
 
 void loop() {
+  //Serial.println("Running Loop");
   // put your main code here, to run repeatedly:
   now = RTC.now();
   
@@ -132,6 +201,7 @@ void loop() {
 * 8, 9, 10, 11, 14 (MISO), 15 (SCK), 16 (MOSI).
 **/
 String getRange(){
+  Serial.println("getting Range");
   String distance = "";
   while(sensorSerial.available())                //clear serial buffer
     sensorSerial.read();

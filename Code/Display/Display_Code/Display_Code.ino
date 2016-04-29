@@ -8,7 +8,6 @@
 #define LCD_CD A2 // Command/Data goes to Analog 2
 #define LCD_WR A1 // LCD Write goes to Analog 1
 #define LCD_RD A0 // LCD Read goes to Analog 0
-
 #define LCD_RESET A4 // Can alternately just connect to Arduino's reset pin
 
 // When using the BREAKOUT BOARD only, use these 8 data lines to the LCD:
@@ -25,7 +24,7 @@
 // (on the 2-row header at the end of the board).
 
 // Assign human-readable names to some common 16-bit color values:
-#define  BLACK   0x0000
+#define BLACK   0x0000
 #define BLUE    0x001F
 #define RED     0xF800
 #define GREEN   0x07E0
@@ -43,7 +42,7 @@ Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 #define tftheight 480
 void setup() {
   Serial.begin(9600);
-
+//*******for main code*******
 #ifdef USE_ADAFRUIT_SHIELD_PINOUT
   Serial.println(F("Using Adafruit 2.8\" TFT Arduino Shield Pinout"));
 #else
@@ -70,6 +69,10 @@ void setup() {
 
 tft.begin(identifier);
 tft.fillScreen(BLACK);
+tft.setTextColor(WHITE);
+tft.setTextSize(4);
+tft.println("Starting Up");
+//*******for main code*******
 delay(1000);
 }
 void loop() {
