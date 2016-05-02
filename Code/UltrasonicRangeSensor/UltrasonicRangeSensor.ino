@@ -5,8 +5,8 @@
 #include <Wire.h> // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 
 #define STORAGE_INTERVAL 5 //time in minutes
-#define SENSOR_SERIAL_RX 6 //pin for sensor
-#define SENSOR_SERIAL_TX 7 //pin (unused)
+#define SENSOR_SERIAL_RX 5 //pin for sensor
+#define SENSOR_SERIAL_TX 6 //pin (unused)
 #define MAX_FILE_NAME_LENGTH 13 //max length of total file name that Arduino allowes (format 8.3)
 
 // change this to match your SD shield or module;
@@ -26,7 +26,7 @@
  */
 
 
-SoftwareSerial sensorSerial(A5,A4,true);//SENSOR_SERIAL_RX, SENSOR_SERIAL_TX, true); // RX, TX
+SoftwareSerial sensorSerial(SENSOR_SERIAL_RX, SENSOR_SERIAL_TX, true); // RX, TX
 File dataFile;
 RTC_DS1307 RTC;
 DateTime now;

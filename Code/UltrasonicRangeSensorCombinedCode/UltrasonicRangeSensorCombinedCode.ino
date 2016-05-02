@@ -6,9 +6,9 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_TFTLCD.h> // Hardware-specific library
 
-#define STORAGE_INTERVAL 1 //time in minutes
-#define SENSOR_SERIAL_RX 5 //pin for sensor
-#define SENSOR_SERIAL_TX 4 //pin (unused)
+#define STORAGE_INTERVAL A4  //time in minutes
+#define SENSOR_SERIAL_RX 5  //pin for sensor
+#define SENSOR_SERIAL_TX 6   //pin (unused)
 #define MAX_FILE_NAME_LENGTH 13 //max length of total file name that Arduino allowes (format 8.3)
 
 #define LCD_CS A3 // Chip Select goes to Analog 3
@@ -63,7 +63,7 @@ Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
  * (on the 2-row header at the end of the board).
  */
 
-SoftwareSerial sensorSerial(A5,A4,true);//SENSOR_SERIAL_RX, SENSOR_SERIAL_TX, true); // RX, TX
+SoftwareSerial sensorSerial(SENSOR_SERIAL_RX, SENSOR_SERIAL_TX, true); // RX, TX
 File dataFile;
 RTC_DS1307 RTC;
 DateTime now;
@@ -132,7 +132,7 @@ void setup() {
     return;
 }
 
-tft.begin(identifier);
+tft.begin(HX8357D);
 tft.fillScreen(BLACK);
 tft.setTextColor(WHITE);
 tft.setTextSize(4);
