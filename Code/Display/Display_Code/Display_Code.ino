@@ -79,3 +79,17 @@ void loop() {
   // put your main code here, to run repeatedly:
 }
 
+unsigned long TimeData
+  tft.fillScreen(BLACK);
+  unsigned long start = micros();
+    tft.print(now.year(), DEC);
+    tft.print('/');
+    tft.print(now.month(), DEC);
+    tft.print('/');
+    tft.print(now.day(), DEC);
+    tft.print(' ');
+    tft.print(now.hour(), DEC);
+    tft.print(':');
+    tft.print(now.minute(), DEC);
+    tft.print(':');
+    tft.println(now.second(), DEC);
