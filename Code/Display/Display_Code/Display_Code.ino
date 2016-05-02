@@ -1,14 +1,21 @@
+#include <SPI.h>
+
+#include <Adafruit_HX8357.h>
+
 #include <Adafruit_GFX.h>    // Core graphics library
-#include <Adafruit_TFTLCD.h> // Hardware-specific library
+//#include <Adafruit_TFTLCD.h> // Hardware-specific library
 
 // The control pins for the LCD can be assigned to any digital or
 // analog pins...but we'll use the analog pins as this allows us to
 // double up the pins with the touch screen (see the TFT paint example).
-#define LCD_CS A3 // Chip Select goes to Analog 3
-#define LCD_CD A2 // Command/Data goes to Analog 2
-#define LCD_WR A1 // LCD Write goes to Analog 1
-#define LCD_RD A0 // LCD Read goes to Analog 0
-#define LCD_RESET A4 // Can alternately just connect to Arduino's reset pin
+//#define LCD_CS A3 // Chip Select goes to Analog 3
+//#define LCD_CD A2 // Command/Data goes to Analog 2
+//#define LCD_WR A1 // LCD Write goes to Analog 1
+//#define LCD_RD A0 // LCD Read goes to Analog 0
+//#define LCD_RESET A4 // Can alternately just connect to Arduino's reset pin
+#define TFT_CS 10
+#define TFT_DC 9
+#define TFT_RST 8
 
 // When using the BREAKOUT BOARD only, use these 8 data lines to the LCD:
 // For the Arduino Uno, Duemilanove, Diecimila, etc.:
@@ -33,7 +40,8 @@
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
 
-Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
+Adafruit_HX8357 tft = Adafruit_HX8357(TFT_CS, TFT_DC, TFT_RST);
+//Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 // If using the shield, all control and data lines are fixed, and
 // a simpler declaration can optionally be used:
 //Adafruit_TFTLCD tft;
@@ -43,16 +51,16 @@ Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 void setup() {
   Serial.begin(9600);
 //*******for main code*******
-#ifdef USE_ADAFRUIT_SHIELD_PINOUT
+/*#ifdef USE_ADAFRUIT_SHIELD_PINOUT
   Serial.println(F("Using Adafruit 2.8\" TFT Arduino Shield Pinout"));
 #else
   Serial.println(F("Using Adafruit 2.8\" TFT Breakout Board Pinout"));
 #endif
   Serial.print("TFT size is "); Serial.print(tft.width()); Serial.print("x"); Serial.println(tft.height());
 
-  tft.reset();
+  tft.reset();*/
 
-  uint16_t identifier = tft.readID();
+  /*uint16_t identifier = tft.readID();
 
     if(identifier == 0x8357) {
     Serial.println(F("Found HX8357D LCD driver"));
@@ -64,10 +72,21 @@ void setup() {
     Serial.println(F("should appear in the library header (Adafruit_TFT.h)."));
     Serial.println(F("If using the breakout board, it should NOT be #defined!"));
     Serial.println(F("Also if using the breakout, double-check that all wiring"));*/
-    return;
+    //return;
+tft.begin(HX8357D);
+  uint8_t x = tft.readcommand8(HX8357_RDPOWMODE);
+  Serial.print("Display Power Mode: 0x"); Serial.println(x, HEX);
+  x = tft.readcommand8(HX8357_RDMADCTL);
+  Serial.print("MADCTL Mode: 0x"); Serial.println(x, HEX);
+  x = tft.readcommand8(HX8357_RDCOLMOD);
+  Serial.print("Pixel Format: 0x"); Serial.println(x, HEX);
+  x = tft.readcommand8(HX8357_RDDIM);
+  Serial.print("Image Format: 0x"); Serial.println(x, HEX);
+  x = tft.readcommand8(HX8357_RDDSDR);
+  Serial.print("Self Diagnostic: 0x"); Serial.println(x, HEX); 
 }
 
-tft.begin(identifier);
+//tft.begin(identifier);
 tft.fillScreen(BLACK);
 tft.setTextColor(WHITE);
 tft.setTextSize(4);
@@ -79,7 +98,7 @@ void loop() {
   // put your main code here, to run repeatedly:
 }
 
-unsigned long TimeData
+/*unsigned long TimeData
   tft.fillScreen(BLACK);
   unsigned long start = micros();
     tft.print(now.year(), DEC);
@@ -92,4 +111,4 @@ unsigned long TimeData
     tft.print(':');
     tft.print(now.minute(), DEC);
     tft.print(':');
-    tft.println(now.second(), DEC);
+    tft.println(now.second(), DEC);*/

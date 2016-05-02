@@ -1,6 +1,6 @@
 #include <Adafruit_HX8357.h>
 
-//#include <SPI.h>             // SPI library **may need to be included**
+#include <SPI.h>             // SPI library **may need to be included**
 #include <SD.h>              // SD read and write library
 #include <SoftwareSerial.h>  // TX and RX simulation library
 #include <RTClib.h>          // Real Time Clock library
@@ -19,7 +19,7 @@
 #define LCD_RD A0 // LCD Read goes to Analog 0
 #define LCD_RESET A4 // Can alternately just connect to Arduino's reset pin
 */
-#define TFT_CS 2
+#define TFT_CS 10
 #define TFT_DC 9
 #define TFT_RST 8
 
