@@ -1,21 +1,27 @@
+#include <Adafruit_HX8357.h>
+
 //#include <SPI.h>             // SPI library **may need to be included**
 #include <SD.h>              // SD read and write library
 #include <SoftwareSerial.h>  // TX and RX simulation library
 #include <RTClib.h>          // Real Time Clock library
 #include <Wire.h>            // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 #include <Adafruit_GFX.h>    // Core graphics library
-#include <Adafruit_TFTLCD.h> // Hardware-specific library
+//#include <Adafruit_TFTLCD.h> // Hardware-specific library
 
 #define STORAGE_INTERVAL A4  //time in minutes
 #define SENSOR_SERIAL_RX 5  //pin for sensor
 #define SENSOR_SERIAL_TX 6   //pin (unused)
 #define MAX_FILE_NAME_LENGTH 13 //max length of total file name that Arduino allowes (format 8.3)
 
-#define LCD_CS A3 // Chip Select goes to Analog 3
+/*#define LCD_CS A3 // Chip Select goes to Analog 3
 #define LCD_CD A2 // Command/Data goes to Analog 2
 #define LCD_WR A1 // LCD Write goes to Analog 1
 #define LCD_RD A0 // LCD Read goes to Analog 0
 #define LCD_RESET A4 // Can alternately just connect to Arduino's reset pin
+*/
+#define TFT_CS 2
+#define TFT_DC 9
+#define TFT_RST 8
 
 #define BLACK   0x0000
 #define BLUE    0x001F
@@ -32,7 +38,7 @@
 //     Sparkfun SD shield: pin 8
 #define SD_CHIP_SELECT 10
 
-Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
+Adafruit_HX8357 tft = Adafruit_HX8357(TFT_CS, TFT_DC, TFT_RST);
 // If using the shield, all control and data lines are fixed, and
 // a simpler declaration can optionally be used:
 //Adafruit_TFTLCD tft;
@@ -115,9 +121,9 @@ void setup() {
 #endif
   Serial.print("TFT size is "); Serial.print(tft.width()); Serial.print("x"); Serial.println(tft.height());
 
-  tft.reset();
+  //tft.reset();
 
-  uint16_t identifier = tft.readID();
+  uint16_t identifier = tft.readcommand8(HX8357_RDPOWMODE);
 
     if(identifier == 0x8357) {
     Serial.println(F("Found HX8357D LCD driver"));
