@@ -1,3 +1,5 @@
+#include <Adafruit_GFX.h>
+#include <Adafruit_HX8357.h>
 #include <SPI.h>
 #include <SD.h>
 #include <SoftwareSerial.h>
@@ -8,6 +10,11 @@
 #define SENSOR_SERIAL_RX 5 //pin for sensor
 #define SENSOR_SERIAL_TX 6 //pin (unused)
 #define MAX_FILE_NAME_LENGTH 13 //max length of total file name that Arduino allowes (format 8.3)
+
+// These are 'flexible' lines that can be changed
+#define TFT_CS 2
+#define TFT_DC 9
+#define TFT_RST 8 // RST can be set to -1 if you tie it to Arduino's reset
 
 // change this to match your SD shield or module;
 //     Arduino Ethernet shield: pin 4
@@ -24,7 +31,9 @@
  * Adafruit Data Logger Shield: MOSI - pin 11, MISO - pin 12, CLK - pin 13, CS - pin 4 (CS pin can be changed)
  *  and pin #10 (SS) must be an output
  */
-
+ 
+// Use hardware SPI (on Uno, #13, #12, #11) and the above for CS/DC
+Adafruit_HX8357 tft = Adafruit_HX8357(TFT_CS, TFT_DC, TFT_RST);
 
 SoftwareSerial sensorSerial(SENSOR_SERIAL_RX, SENSOR_SERIAL_TX, true); // RX, TX
 File dataFile;
@@ -39,11 +48,29 @@ int lastSaveMinute = 0;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
+
+  //Serial.println("HX8357D Test!"); 
+
+  
+
+  /*  // read diagnostics (optional but can help debug problems)
+  uint8_t x = tft.readcommand8(HX8357_RDPOWMODE);
+  Serial.print("Display Power Mode: 0x"); Serial.println(x, HEX);
+  x = tft.readcommand8(HX8357_RDMADCTL);
+  Serial.print("MADCTL Mode: 0x"); Serial.println(x, HEX);
+  x = tft.readcommand8(HX8357_RDCOLMOD);
+  Serial.print("Pixel Format: 0x"); Serial.println(x, HEX);
+  x = tft.readcommand8(HX8357_RDDIM);
+  Serial.print("Image Format: 0x"); Serial.println(x, HEX);
+  x = tft.readcommand8(HX8357_RDDSDR);
+  Serial.print("Self Diagnostic: 0x"); Serial.println(x, HEX); */
+
   
   /*while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }*/
   sensorSerial.begin(9600);
+  
   
   //initialize SD card
   pinMode(SS, OUTPUT);
@@ -65,20 +92,22 @@ void setup() {
    * comment out the if and upload, than uncoment it and upload again. It should 
    * automatically set the time for the first use
   */
-  if (! RTC.isrunning()) {
+  /*if (! RTC.isrunning()) {
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
     RTC.adjust(DateTime(__DATE__, __TIME__));
-  }
+  }*/
+  tft.begin(HX8357D);
+  tft.fillScreen(HX8357_BLACK);
 }
-
-
-
-
 void loop() {
   // put your main code here, to run repeatedly:
   now = RTC.now();
-  
+
+  tft.fillScreen(HX8357_BLACK);
+  tft.setTextColor(HX8357_WHITE);
+  tft.setTextSize(4);
+  tft.println("Starting Up");
   /*
    * date functions
    * now.year()
