@@ -92,22 +92,26 @@ void setup() {
    * comment out the if and upload, than uncoment it and upload again. It should 
    * automatically set the time for the first use
   */
-  /*if (! RTC.isrunning()) {
+  if (! RTC.isrunning()) {
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
     RTC.adjust(DateTime(__DATE__, __TIME__));
-  }*/
+  }
   tft.begin(HX8357D);
   tft.fillScreen(HX8357_BLACK);
+  tft.setRotation(3);
 }
 void loop() {
   // put your main code here, to run repeatedly:
   now = RTC.now();
 
   tft.fillScreen(HX8357_BLACK);
+  tft.setCursor(50, 0);
   tft.setTextColor(HX8357_WHITE);
-  tft.setTextSize(4);
-  tft.println("Starting Up");
+  tft.setTextSize(3);
+  tft.println(timeStamp());
+  tft.setCursor(50, 30);
+  tft.println("Distance: " + getRange() + "mm");
   /*
    * date functions
    * now.year()
@@ -133,7 +137,7 @@ void loop() {
       lastSaveMinute = now.minute();
     }
   }
-  delay(1000);
+  delay(5000);
   
   /* Use for analog read pin of Ultrasonic Range Sensor
   double inch = analogRead(rangeIn) * 0.1981 - 1.9613;

@@ -74,6 +74,7 @@ void setup() {
     Serial.println(F("Also if using the breakout, double-check that all wiring"));*/
     //return;
 tft.begin(HX8357D);
+
   uint8_t x = tft.readcommand8(HX8357_RDPOWMODE);
   Serial.print("Display Power Mode: 0x"); Serial.println(x, HEX);
   x = tft.readcommand8(HX8357_RDMADCTL);
@@ -88,8 +89,9 @@ tft.begin(HX8357D);
 
 //tft.begin(identifier);
 tft.fillScreen(BLACK);
+tft.setCursor(0, 0);
 tft.setTextColor(WHITE);
-tft.setTextSize(4);
+tft.setTextSize(3);
 tft.println("Starting Up");
 //*******for main code*******
 delay(1000);
