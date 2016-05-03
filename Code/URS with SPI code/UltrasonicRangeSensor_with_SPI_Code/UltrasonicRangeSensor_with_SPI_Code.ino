@@ -1,9 +1,9 @@
-#include <Adafruit_GFX.h>
-#include <Adafruit_HX8357.h>
+#include <Adafruit_GFX.h> // Graphics Library
+#include <Adafruit_HX8357.h> // Display specific library
 #include <SPI.h>
 #include <SD.h>
 #include <SoftwareSerial.h>
-#include <RTClib.h>
+#include <RTClib.h> //Real Time Clock Library
 #include <Wire.h> // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 
 #define STORAGE_INTERVAL 1 //time in minutes
@@ -11,10 +11,10 @@
 #define SENSOR_SERIAL_TX 6 //pin (unused)
 #define MAX_FILE_NAME_LENGTH 13 //max length of total file name that Arduino allowes (format 8.3)
 
-// These are 'flexible' lines that can be changed
-#define TFT_CS 2
-#define TFT_DC 9
-#define TFT_RST 8 // RST can be set to -1 if you tie it to Arduino's reset
+// These are 'flexible' lines that can be changed (for LCD display)
+#define TFT_CS 2 //Chip select pin for the LCD display
+#define TFT_DC 9 //Data command select pin
+#define TFT_RST 8 // Tied display reset to Arduino's reset
 
 // change this to match your SD shield or module;
 //     Arduino Ethernet shield: pin 4
@@ -46,15 +46,10 @@ int lastSaveMinute = 0;
 
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
 
-  //Serial.println("HX8357D Test!"); 
-
-  
-
-  /*  // read diagnostics (optional but can help debug problems)
-  uint8_t x = tft.readcommand8(HX8357_RDPOWMODE);
+  // read diagnostics (optional but can help debug problems with the LCD display)
+  /*uint8_t x = tft.readcommand8(HX8357_RDPOWMODE);
   Serial.print("Display Power Mode: 0x"); Serial.println(x, HEX);
   x = tft.readcommand8(HX8357_RDMADCTL);
   Serial.print("MADCTL Mode: 0x"); Serial.println(x, HEX);
@@ -64,15 +59,9 @@ void setup() {
   Serial.print("Image Format: 0x"); Serial.println(x, HEX);
   x = tft.readcommand8(HX8357_RDDSDR);
   Serial.print("Self Diagnostic: 0x"); Serial.println(x, HEX); */
-
-  
-  /*while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
-  }*/
-  sensorSerial.begin(9600);
-  
-  
+ 
   //initialize SD card
+  sensorSerial.begin(9600);
   pinMode(SS, OUTPUT);
   Serial.print("Initializing SD card...");
   // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
@@ -84,23 +73,31 @@ void setup() {
     return;
   }
   Serial.println("initialization done.");
-  
-  Wire.begin();
+
+  //initialize SD card
+  Wire.begin(); 
   RTC.begin();
 
   /* To set the time on the data logging sheild to the time on your computer,
    * comment out the if and upload, than uncoment it and upload again. It should 
-   * automatically set the time for the first use
-  */
+   * automatically set the time for the first use */
   if (! RTC.isrunning()) {
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
     RTC.adjust(DateTime(__DATE__, __TIME__));
   }
+
+  //initialize LCD display
   tft.begin(HX8357D);
-  tft.fillScreen(HX8357_BLACK);
-  tft.setRotation(3);
+  tft.fillScreen(HX8357_BLACK); //fill LCD screen with black
+  /*sets the rotation of the objects on the screen: 
+  0 will give portrait view, 
+  1 will give lanscape view, 
+  2 will give opposite potrait view of 0, 
+  3 will give opposite landscape view of 1 */
+  tft.setRotation(3); 
 }
+
 void loop() {
   // put your main code here, to run repeatedly:
   now = RTC.now();
@@ -111,7 +108,7 @@ void loop() {
   tft.setTextSize(3);
   tft.println(timeStamp());
   tft.setCursor(50, 30);
-  tft.println("Distance: " + getRange() + "mm");
+  tft.println("Sensor Distance: " + getRange() + "mm");
   /*
    * date functions
    * now.year()
