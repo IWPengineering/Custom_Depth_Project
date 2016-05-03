@@ -1,4 +1,4 @@
-				Read Me
+				READ ME
 Current Design:
 
 Arduino with Adafruit Datalogging Arduino Shield (SD formatted and inserted)
@@ -32,7 +32,7 @@ There are two programes that are used for the Arduino
 ResetTimeAndDate.ino
 (Documents\GitHub\Custom_Depth_Project\Code\ResetTimeAndDate\ResetTimeAndDate.ino)
 This will reset the time and date on the Datalogging shield to the time the program was compiled/uploaded
-REPROGRAM IMIDEATLY WITH PROPER CODE: DO NOT RESTART
+REPROGRAM IMIDEATLY WITH PROPER CODE: DO NOT RESTART ARDUINO
 
 UltrasonicRangeSensor_with_SPI_Code.ino
 (Documents\GitHub\Custom_Depth_Project\Code\URS with SPI code\UltrasonicRangeSensor_with_SPI_Code\UltrasonicRangeSensor_with_SPI_Code.ino)
