@@ -1,12 +1,10 @@
-#include <Adafruit_HX8357.h>
-
-#include <SPI.h>             // SPI library **may need to be included**
+//#include <SPI.h>             // SPI library **may need to be included**
 #include <SD.h>              // SD read and write library
 #include <SoftwareSerial.h>  // TX and RX simulation library
 #include <RTClib.h>          // Real Time Clock library
 #include <Wire.h>            // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 #include <Adafruit_GFX.h>    // Core graphics library
-//#include <Adafruit_TFTLCD.h> // Hardware-specific library
+#include <Adafruit_HX8357.h> // Hardware-specific library
 
 #define STORAGE_INTERVAL A4  //time in minutes
 #define SENSOR_SERIAL_RX 5  //pin for sensor
@@ -21,7 +19,7 @@
 */
 #define TFT_CS 10
 #define TFT_DC 9
-#define TFT_RST 8
+#define TFT_RST 8 // RST can be set to -1 if you tie it to Arduino's reset
 
 #define BLACK   0x0000
 #define BLUE    0x001F
@@ -43,8 +41,8 @@ Adafruit_HX8357 tft = Adafruit_HX8357(TFT_CS, TFT_DC, TFT_RST);
 // a simpler declaration can optionally be used:
 //Adafruit_TFTLCD tft;
 
-#define tftwidth 320
-#define tftheight 480
+/*#define tftwidth 320
+#define tftheight 480*/
 /*
  * Note:
  * See line 68 for instructions on manually reseting the time and date on the dataloging shield.
