@@ -6,7 +6,7 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_HX8357.h> // Hardware-specific library
 
-#define STORAGE_INTERVAL A4  //time in minutes
+#define STORAGE_INTERVAL 1  //time in minutes
 #define SENSOR_SERIAL_RX 5  //pin for sensor
 #define SENSOR_SERIAL_TX 6   //pin (unused)
 #define MAX_FILE_NAME_LENGTH 13 //max length of total file name that Arduino allowes (format 8.3)

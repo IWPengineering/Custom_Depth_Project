@@ -74,7 +74,7 @@ void setup() {
   }
   Serial.println("initialization done.");
 
-  //initialize SD card
+  //initialize Real Time Clock
   Wire.begin(); 
   RTC.begin();
 
@@ -99,18 +99,18 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   now = RTC.now();
 
-  tft.fillScreen(HX8357_BLACK);
-  tft.setCursor(50, 0);
-  tft.setTextColor(HX8357_WHITE);
-  tft.setTextSize(3);
-  tft.println(timeStamp());
-  tft.setCursor(50, 30);
-  tft.println("Sensor Distance: " + getRange() + "mm");
+  tft.fillScreen(HX8357_BLACK); //fill LCD display with black
+  tft.setCursor(0, 0); //set cursor to coordinate (0, 0)
+  tft.setTextColor(HX8357_WHITE); //Set text to white
+  tft.setTextSize(3); //Set text size to 3
+  tft.println("Date: " + timeStamp()); //Display time
+  tft.setCursor(0, 30); //Move cursor down
+  tft.println("Sensor Distance: " + getRange() + "mm"); //Display Sensor Range
+  
   /*
-   * date functions
+   * Date Functions:
    * now.year()
    * now.month()
    * now.day()
@@ -122,14 +122,16 @@ void loop() {
   */
 
 
-
+//Write Date/Time and Range Data to SD card every time interval. Time interval defined by STORAGE_INTERVAL above
   if((now.minute() % STORAGE_INTERVAL) == 0){//
     if(lastSaveMinute != now.minute()){
       Serial.println("******Running Periodic Sequence******");
       Serial.println(timeStamp());
       Serial.println("distance: " + getRange() + "mm");
       writeToFile((String)now.year() + "-" + (String)now.month() + ".txt", timeStamp(), getRange());
-      // + (String)now.year() + "-" + (String)now.month() + "-" + (String)now.day()
+      
+      //Would like to use the following for file name but too long to be used
+      //(String)now.year() + "-" + (String)now.month() + "-" + (String)now.day()
       
       lastSaveMinute = now.minute();
     }
@@ -226,20 +228,24 @@ void writeToFile(String fileNameString, String timeText, String range){
    
   //check file exsistance
   if (SD.exists(fileName)) {
-    Serial.println(fileNameString + " exists.");
+    Serial.print(fileName);
+    Serial.println(" exists.");
   }
   else {
-    Serial.println(fileNameString + " doesn't exist.");
+    Serial.print(fileName);
+    Serial.println(" doesn't exist.");
     firstUse = true;
   }
   
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
-  dataFile = SD.open(fileName, FILE_WRITE);
+  File dataFile = SD.open(fileName, FILE_WRITE);
   
   // if the file opened okay, write to it:
   if (dataFile) {
-    Serial.print("Writing to " + fileNameString + "...");
+    Serial.print("Writing to ");
+    Serial.print(fileName);
+    Serial.print("...");
     if(firstUse){//create information in this header
       dataFile.println("******************** LOG ********************");
       dataFile.print("This log was created ");
