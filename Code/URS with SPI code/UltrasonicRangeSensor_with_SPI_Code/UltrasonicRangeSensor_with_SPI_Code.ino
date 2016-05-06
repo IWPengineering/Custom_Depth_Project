@@ -24,7 +24,7 @@
 
 /*
  * Note:
- * See line 68 for instructions on manually reseting the time and date on the dataloging shield.
+ * See line 81 for instructions on manually reseting the time and date on the dataloging shield.
  * 
  * The Circuit:
  * Ultrasonic Range Sensor: Pin 5 - Arduino Pin 6 (SoftSerial also requires a TX pin, we are using 7)
@@ -80,7 +80,8 @@ void setup() {
 
   /* To set the time on the data logging sheild to the time on your computer,
    * comment out the if and upload, than uncoment it and upload again. It should 
-   * automatically set the time for the first use */
+   * automatically set the time for the first use
+   */
   if (! RTC.isrunning()) {
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
@@ -91,10 +92,11 @@ void setup() {
   tft.begin(HX8357D);
   tft.fillScreen(HX8357_BLACK); //fill LCD screen with black
   /*sets the rotation of the objects on the screen: 
-  0 will give portrait view, 
-  1 will give lanscape view, 
-  2 will give opposite potrait view of 0, 
-  3 will give opposite landscape view of 1 */
+   * 0 will give portrait view, 
+   * 1 will give lanscape view, 
+   * 2 will give opposite potrait view of 0, 
+   * 3 will give opposite landscape view of 1
+   */
   tft.setRotation(3); 
 }
 
@@ -202,7 +204,7 @@ String timeStamp(){
 
 /**
 * writeToFile
-* modified 21 April 2016
+* modified 1 May 2016
 * by David MacBride
 *  
 * Saves a String to specified file
@@ -262,7 +264,8 @@ void writeToFile(String fileNameString, String timeText, String range){
     Serial.println("done.");
   } else {
     // if the file didn't open, print an error:
-    Serial.println("error opening " + fileNameString);
+    Serial.print("error opening ");
+    Serial.println(fileName);
   }
 }
 
